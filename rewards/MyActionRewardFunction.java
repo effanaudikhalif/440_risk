@@ -281,34 +281,68 @@ public class MyActionRewardFunction
         final int territoryDelta = myTerritoriesAfter - myTerritoriesBefore;
         final int continentDelta = myContinentsAfter - myContinentsBefore;
         final int armyLoss = Math.max(0, myArmiesBefore - myArmiesAfter);
-
-        reward += TERRITORY_DELTA_WEIGHT * territoryDelta;
-        reward += CONTINENT_DELTA_WEIGHT * continentDelta;
-        reward += ARMY_SHARE_DELTA_WEIGHT * (armyShareAfter - armyShareBefore);
-        reward += STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT
+        final double territoryComponent = TERRITORY_DELTA_WEIGHT * territoryDelta;
+        final double continentComponent = CONTINENT_DELTA_WEIGHT * continentDelta;
+        final double armyShareComponent = ARMY_SHARE_DELTA_WEIGHT * (armyShareAfter - armyShareBefore);
+        final double strongestOpponentComponent = STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT
             * (strongestOpponentArmyShareBefore - strongestOpponentArmyShareAfter);
-        reward += CONTINENT_COMPLETION_DELTA_WEIGHT * (continentCompletionAfter - continentCompletionBefore);
-        reward += BORDER_VULNERABILITY_DELTA_WEIGHT * (borderVulnerabilityBefore - borderVulnerabilityAfter);
+        final double continentCompletionComponent =
+            CONTINENT_COMPLETION_DELTA_WEIGHT * (continentCompletionAfter - continentCompletionBefore);
+        final double borderVulnerabilityComponent =
+            BORDER_VULNERABILITY_DELTA_WEIGHT * (borderVulnerabilityBefore - borderVulnerabilityAfter);
+        final double successfulAttackComponent =
+            (action instanceof AttackAction && territoryDelta > 0) ? SUCCESSFUL_ATTACK_BONUS : 0.0;
+        final double failedCostlyAttackPenalty =
+            (action instanceof AttackAction && territoryDelta <= 0 && armyLoss > 0)
+                ? FAILED_COSTLY_ATTACK_WEIGHT * safeDivide(armyLoss, totalArmiesBefore)
+                : 0.0;
+        final double breakOpponentContinentComponent =
+            BREAK_OPPONENT_CONTINENT_WEIGHT * positivePart(enemyContinentsBefore - enemyContinentsAfter);
+        final double noActionPenalty =
+            (action instanceof NoAction && this.countFavorableAttacks(state) > 0)
+                ? NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY
+                : 0.0;
 
-        if(action instanceof AttackAction && territoryDelta > 0)
-        {
-            reward += SUCCESSFUL_ATTACK_BONUS;
-        }
-
-        if(action instanceof AttackAction && territoryDelta <= 0 && armyLoss > 0)
-        {
-            reward -= FAILED_COSTLY_ATTACK_WEIGHT * safeDivide(armyLoss, totalArmiesBefore);
-        }
-
-        reward += BREAK_OPPONENT_CONTINENT_WEIGHT * positivePart(enemyContinentsBefore - enemyContinentsAfter);
-
-        if(action instanceof NoAction && this.countFavorableAttacks(state) > 0)
-        {
-            reward -= NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY;
-        }
+        reward += territoryComponent;
+        reward += continentComponent;
+        reward += armyShareComponent;
+        reward += strongestOpponentComponent;
+        reward += continentCompletionComponent;
+        reward += borderVulnerabilityComponent;
+        reward += successfulAttackComponent;
+        reward -= failedCostlyAttackPenalty;
+        reward += breakOpponentContinentComponent;
+        reward -= noActionPenalty;
 
         final double finalReward = this.clamp(reward);
-        System.out.println("[ActionReward] " + action + " reward=" + finalReward);
+        System.out.println("\n\n================================");
+        System.out.println("EXECUTED ACTION -> REWARD");
+        System.out.println("================================");
+        System.out.println("[ActionReward] action="
+            + " seen={territoryDelta=" + territoryDelta
+            + ", continentDelta=" + continentDelta
+            + ", armyShareBefore=" + armyShareBefore
+            + ", armyShareAfter=" + armyShareAfter
+            + ", strongestOpponentBefore=" + strongestOpponentArmyShareBefore
+            + ", strongestOpponentAfter=" + strongestOpponentArmyShareAfter
+            + ", continentCompletionBefore=" + continentCompletionBefore
+            + ", continentCompletionAfter=" + continentCompletionAfter
+            + ", borderVulnerabilityBefore=" + borderVulnerabilityBefore
+            + ", borderVulnerabilityAfter=" + borderVulnerabilityAfter
+            + ", enemyContinentsBefore=" + enemyContinentsBefore
+            + ", enemyContinentsAfter=" + enemyContinentsAfter
+            + ", armyLoss=" + armyLoss
+            + "} rewardParts={territory=" + territoryComponent
+            + ", continent=" + continentComponent
+            + ", armyShare=" + armyShareComponent
+            + ", strongestOpponent=" + strongestOpponentComponent
+            + ", continentCompletion=" + continentCompletionComponent
+            + ", borderVulnerability=" + borderVulnerabilityComponent
+            + ", successfulAttack=" + successfulAttackComponent
+            + ", failedCostlyAttackPenalty=-" + failedCostlyAttackPenalty
+            + ", breakOpponentContinent=" + breakOpponentContinentComponent
+            + ", noActionPenalty=-" + noActionPenalty
+            + "} final=" + finalReward);
         return finalReward;
     }
 

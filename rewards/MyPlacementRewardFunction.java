@@ -150,41 +150,42 @@ public class MyPlacementRewardFunction
         final int adjacentFriendlyArmies = this.sumAdjacentFriendlyArmies(state, action);
         final double continentCompletion = this.getContinentCompletion(state, action);
         final int continentArmyValue = action.continent().armiesPerTurn();
+        final double borderComponent = adjacentEnemyCount > 0 ? BORDER_BONUS : 0.0;
+        final double underdefendedComponent = adjacentEnemyArmies > currentArmies ? UNDERDEFENDED_BONUS : 0.0;
+        final double outnumberedFrontComponent = adjacentEnemyArmies > adjacentFriendlyArmies ? OUTNUMBERED_FRONT_BONUS : 0.0;
+        final double continentCompletionComponent = CONTINENT_COMPLETION_WEIGHT * continentCompletion * continentArmyValue;
+        final double highCompletionComponent = continentCompletion >= 0.75
+            ? HIGH_COMPLETION_CONTINENT_BONUS_WEIGHT * continentArmyValue
+            : 0.0;
+        final double quietPenalty = adjacentEnemyCount == 0 ? QUIET_TERRITORY_PENALTY : 0.0;
+        final double overdefendedPenalty =
+            (adjacentEnemyCount > 0 && currentArmies > adjacentEnemyArmies + 5) ? OVERDEFENDED_TERRITORY_PENALTY : 0.0;
 
-        if(adjacentEnemyCount > 0)
-        {
-            reward += BORDER_BONUS;
-        }
-
-        if(adjacentEnemyArmies > currentArmies)
-        {
-            reward += UNDERDEFENDED_BONUS;
-        }
-
-        if(adjacentEnemyArmies > adjacentFriendlyArmies)
-        {
-            reward += OUTNUMBERED_FRONT_BONUS;
-        }
-
-        reward += CONTINENT_COMPLETION_WEIGHT * continentCompletion * continentArmyValue;
-
-        if(continentCompletion >= 0.75)
-        {
-            reward += HIGH_COMPLETION_CONTINENT_BONUS_WEIGHT * continentArmyValue;
-        }
-
-        if(adjacentEnemyCount == 0)
-        {
-            reward -= QUIET_TERRITORY_PENALTY;
-        }
-
-        if(adjacentEnemyCount > 0 && currentArmies > adjacentEnemyArmies + 5)
-        {
-            reward -= OVERDEFENDED_TERRITORY_PENALTY;
-        }
+        reward += borderComponent;
+        reward += underdefendedComponent;
+        reward += outnumberedFrontComponent;
+        reward += continentCompletionComponent;
+        reward += highCompletionComponent;
+        reward -= quietPenalty;
+        reward -= overdefendedPenalty;
 
         final double finalReward = this.clamp(reward);
-        System.out.println("[PlacementReward] " + action.name() + " reward=" + finalReward);
+        System.out.println("[PlacementReward] territory=" + action.name()
+            + " seen={currentArmies=" + currentArmies
+            + ", enemyCount=" + adjacentEnemyCount
+            + ", enemyArmies=" + adjacentEnemyArmies
+            + ", friendlyArmies=" + adjacentFriendlyArmies
+            + ", continentCompletion=" + continentCompletion
+            + ", continentArmyValue=" + continentArmyValue
+            + "} rewardParts={base=" + BASE_REWARD
+            + ", border=" + borderComponent
+            + ", underdefended=" + underdefendedComponent
+            + ", outnumberedFront=" + outnumberedFrontComponent
+            + ", continentProgress=" + continentCompletionComponent
+            + ", highCompletion=" + highCompletionComponent
+            + ", quietPenalty=-" + quietPenalty
+            + ", overdefendedPenalty=-" + overdefendedPenalty
+            + "} final=" + finalReward);
         return finalReward;
     }
 
