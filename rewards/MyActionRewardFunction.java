@@ -41,6 +41,11 @@ public class MyActionRewardFunction
     private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 15.0;
     private static final double TURN_TAX_PER_TURN = 30.0;
 
+
+    // continet
+    // territory 
+    // army
+
     public MyActionRewardFunction(final int agentId)
     {
         super(RewardType.FULL_TRANSITION, agentId);
@@ -259,6 +264,8 @@ public class MyActionRewardFunction
     {
         double reward = 0.0;
 
+        // ! DELTAS
+
         final int myTerritoriesBefore = this.countTerritories(state, this.getAgentId());
         final int myTerritoriesAfter = this.countTerritories(nextState, this.getAgentId());
         final int myArmiesBefore = this.countArmies(state, this.getAgentId());
@@ -279,9 +286,14 @@ public class MyActionRewardFunction
         final double borderVulnerabilityBefore = this.getBorderVulnerabilityRatio(state);
         final double borderVulnerabilityAfter = this.getBorderVulnerabilityRatio(nextState);
 
-        final int territoryDelta = myTerritoriesAfter - myTerritoriesBefore;
-        final int continentDelta = myContinentsAfter - myContinentsBefore;
-        final int armyLoss = Math.max(0, myArmiesBefore - myArmiesAfter);
+        final double territoryDelta = (double)( myTerritoriesAfter - myTerritoriesBefore) / 42.0;
+        final double continentDelta = (double) (myContinentsAfter - myContinentsBefore) / 6.0;
+        final double armyLoss = (float) Math.max(0, myArmiesBefore - myArmiesAfter) / (double) totalArmiesAfter ;
+
+
+        // ! COMPONENTS
+
+
         final double territoryComponent = TERRITORY_DELTA_WEIGHT * territoryDelta;
         final double continentComponent = CONTINENT_DELTA_WEIGHT * continentDelta;
         final double armyShareComponent = ARMY_SHARE_DELTA_WEIGHT * (armyShareAfter - armyShareBefore);
@@ -306,6 +318,9 @@ public class MyActionRewardFunction
         final double turnTaxPenalty =
             TURN_TAX_PER_TURN;
 
+
+        // ! Adding to reward
+            
         reward += territoryComponent;
         reward += continentComponent;
         reward += armyShareComponent;
