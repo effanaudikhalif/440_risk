@@ -279,19 +279,6 @@ public class MyStateSensorArray
         // features.set(0, 21, safeDivide(state.getNumTurns(), 100.0));
         // features.set(0, 22, state.isOver() ? 1.0 : 0.0);
 
-        System.out.println("[StateSensor] "
-            + "territoryShare=" + features.get(0, 0)
-            + ", armyShare=" + features.get(0, 1)
-            + ", continentShare=" + features.get(0, 2)
-            + ", bonusArmies=" + features.get(0, 3)
-            + ", cardCount=" + features.get(0, 4)
-            + ", canTrade=" + features.get(0, 6)
-            + ", strongestEnemyArmyShare=" + features.get(0, 7)
-            + ", continentCompletionMax=" + features.get(0, 10)
-            + ", borderRatio=" + features.get(0, 13)
-            + ", favorableAttackRatio=" + features.get(0, 17)
-            + ", vulnerableRatio=" + features.get(0, 18));
-
         return features;
     }
 

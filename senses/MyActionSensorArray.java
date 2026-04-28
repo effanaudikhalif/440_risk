@@ -126,21 +126,6 @@ public class MyActionSensorArray
             features.set(0, 11, this.targetCompletesContinent(state, target) ? 1.0 : 0.0);
         }
 
-        System.out.println("\n\n[ActionSensor] action=" + action
-            + " seen={isAttack=" + features.get(0, 0)
-            + ", isFortify=" + features.get(0, 1)
-            + ", isRedeem=" + features.get(0, 2)
-            + ", isNoAction=" + features.get(0, 3)
-            + ", isTerminal=" + features.get(0, 4)
-            + ", actionCounter=" + features.get(0, 5)
-            + ", sourceArmies=" + features.get(0, 6)
-            + ", targetArmies=" + features.get(0, 7)
-            + ", committedArmies=" + features.get(0, 8)
-            + ", armyAdvantage=" + features.get(0, 9)
-            + ", committedRatio=" + features.get(0, 10)
-            + ", targetCompletesContinent=" + features.get(0, 11)
-            + "}");
-
         return features; // row vector
     }
 

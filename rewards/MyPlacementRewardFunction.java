@@ -170,22 +170,6 @@ public class MyPlacementRewardFunction
         reward -= overdefendedPenalty;
 
         final double finalReward = this.clamp(reward);
-        System.out.println("[PlacementReward] territory=" + action.name()
-            + " seen={currentArmies=" + currentArmies
-            + ", enemyCount=" + adjacentEnemyCount
-            + ", enemyArmies=" + adjacentEnemyArmies
-            + ", friendlyArmies=" + adjacentFriendlyArmies
-            + ", continentCompletion=" + continentCompletion
-            + ", continentArmyValue=" + continentArmyValue
-            + "} rewardParts={base=" + BASE_REWARD
-            + ", border=" + borderComponent
-            + ", underdefended=" + underdefendedComponent
-            + ", outnumberedFront=" + outnumberedFrontComponent
-            + ", continentProgress=" + continentCompletionComponent
-            + ", highCompletion=" + highCompletionComponent
-            + ", quietPenalty=-" + quietPenalty
-            + ", overdefendedPenalty=-" + overdefendedPenalty
-            + "} final=" + finalReward);
         return finalReward;
     }
 

@@ -30,15 +30,16 @@ public class MyActionRewardFunction
     extends RewardFunction<Action>
 {
     private static final double TERRITORY_DELTA_WEIGHT = 20.0;
-    private static final double CONTINENT_DELTA_WEIGHT = 35.0;
-    private static final double ARMY_SHARE_DELTA_WEIGHT = 60.0;
-    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 45.0;
-    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 20.0;
+    private static final double CONTINENT_DELTA_WEIGHT = 60.0;
+    private static final double ARMY_SHARE_DELTA_WEIGHT = 35.0;
+    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 20.0;
+    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 45.0;
     private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 25.0;
     private static final double SUCCESSFUL_ATTACK_BONUS = 12.0;
     private static final double FAILED_COSTLY_ATTACK_WEIGHT = 40.0;
     private static final double BREAK_OPPONENT_CONTINENT_WEIGHT = 25.0;
     private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 15.0;
+    private static final double TURN_TAX_PER_TURN = 30.0;
 
     public MyActionRewardFunction(final int agentId)
     {
@@ -302,6 +303,8 @@ public class MyActionRewardFunction
             (action instanceof NoAction && this.countFavorableAttacks(state) > 0)
                 ? NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY
                 : 0.0;
+        final double turnTaxPenalty =
+            TURN_TAX_PER_TURN;
 
         reward += territoryComponent;
         reward += continentComponent;
@@ -313,36 +316,9 @@ public class MyActionRewardFunction
         reward -= failedCostlyAttackPenalty;
         reward += breakOpponentContinentComponent;
         reward -= noActionPenalty;
+        reward -= turnTaxPenalty;
 
         final double finalReward = this.clamp(reward);
-        System.out.println("\n\n================================");
-        System.out.println("EXECUTED ACTION -> REWARD");
-        System.out.println("================================");
-        System.out.println("[ActionReward] action="
-            + " seen={territoryDelta=" + territoryDelta
-            + ", continentDelta=" + continentDelta
-            + ", armyShareBefore=" + armyShareBefore
-            + ", armyShareAfter=" + armyShareAfter
-            + ", strongestOpponentBefore=" + strongestOpponentArmyShareBefore
-            + ", strongestOpponentAfter=" + strongestOpponentArmyShareAfter
-            + ", continentCompletionBefore=" + continentCompletionBefore
-            + ", continentCompletionAfter=" + continentCompletionAfter
-            + ", borderVulnerabilityBefore=" + borderVulnerabilityBefore
-            + ", borderVulnerabilityAfter=" + borderVulnerabilityAfter
-            + ", enemyContinentsBefore=" + enemyContinentsBefore
-            + ", enemyContinentsAfter=" + enemyContinentsAfter
-            + ", armyLoss=" + armyLoss
-            + "} rewardParts={territory=" + territoryComponent
-            + ", continent=" + continentComponent
-            + ", armyShare=" + armyShareComponent
-            + ", strongestOpponent=" + strongestOpponentComponent
-            + ", continentCompletion=" + continentCompletionComponent
-            + ", borderVulnerability=" + borderVulnerabilityComponent
-            + ", successfulAttack=" + successfulAttackComponent
-            + ", failedCostlyAttackPenalty=-" + failedCostlyAttackPenalty
-            + ", breakOpponentContinent=" + breakOpponentContinentComponent
-            + ", noActionPenalty=-" + noActionPenalty
-            + "} final=" + finalReward);
         return finalReward;
     }
 

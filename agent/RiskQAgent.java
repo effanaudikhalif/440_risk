@@ -51,7 +51,9 @@ import pas.risk.senses.MyStateSensorArray;
 public class RiskQAgent
     extends NeuralQAgent
 {
+    private static final int TURN_LOG_INTERVAL = 25;
     private final Random random = new Random();
+    private int lastLoggedTurn = Integer.MIN_VALUE;
 
 
     public RiskQAgent(int agentId)
@@ -169,11 +171,35 @@ public class RiskQAgent
 
     private double getExplorationRate(final GameView game)
     {
-        return Math.max(0.05, 1.0 - (game.getNumTurns() / 500.0));
+        return Math.max(0.05, 1.0 - (game.getNumTurns() / 250.0));
+    }
+
+    private void maybeLogProgress(final GameView game)
+    {
+        final int turn = game.getNumTurns();
+        if(turn == this.lastLoggedTurn)
+        {
+            return;
+        }
+
+        if(turn != 0 && (turn % TURN_LOG_INTERVAL) != 0 && !game.isOver())
+        {
+            return;
+        }
+
+        this.lastLoggedTurn = turn;
+        System.out.println("[RiskQAgent] agent=" + this.agentId()
+            + " turn=" + turn
+            + " territories=" + game.getTerritoriesOwnedBy(this.agentId()).size()
+            + " bonusArmies=" + game.getBonusArmiesFor(this.agentId())
+            + " cards=" + game.getAgentInventory(this.agentId()).size()
+            + " exploreRate=" + this.getExplorationRate(game)
+            + " gameOver=" + game.isOver());
     }
 
     private boolean shouldExplore(final GameView game)
     {
+        this.maybeLogProgress(game);
         final double rate = this.getExplorationRate(game);
         return this.random.nextDouble() < rate;
     }

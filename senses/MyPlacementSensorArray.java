@@ -96,17 +96,6 @@ public class MyPlacementSensorArray
         features.set(0, 6, defensiveAdvantage);
         features.set(0, 7, continentCompletion);
 
-        System.out.println("[PlacementSensor] territory=" + territory.name()
-            + " seen={armies=" + features.get(0, 0)
-            + ", remainingArmies=" + features.get(0, 1)
-            + ", enemyNeighbors=" + features.get(0, 2)
-            + ", friendlyNeighbors=" + features.get(0, 3)
-            + ", enemyArmies=" + features.get(0, 4)
-            + ", friendlyArmies=" + features.get(0, 5)
-            + ", defensiveAdvantage=" + features.get(0, 6)
-            + ", continentCompletion=" + features.get(0, 7)
-            + "}");
-
         return features; // row vector
     }
 
