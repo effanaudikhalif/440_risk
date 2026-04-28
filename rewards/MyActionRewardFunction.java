@@ -29,6 +29,8 @@ import edu.bu.pas.risk.territory.Territory;
 public class MyActionRewardFunction
     extends RewardFunction<Action>
 {
+
+    // new ethan branch test
     private static final double CONTINENT_DELTA_WEIGHT = 60.0;
     private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 45.0;
     private static final double TERRITORY_DELTA_WEIGHT = 20.0;
