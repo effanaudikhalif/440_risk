@@ -29,14 +29,16 @@ import edu.bu.pas.risk.territory.Territory;
 public class MyActionRewardFunction
     extends RewardFunction<Action>
 {
-    private static final double TERRITORY_DELTA_WEIGHT = 20.0;
     private static final double CONTINENT_DELTA_WEIGHT = 60.0;
-    private static final double ARMY_SHARE_DELTA_WEIGHT = 35.0;
-    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 20.0;
     private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 45.0;
-    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 25.0;
-    private static final double SUCCESSFUL_ATTACK_BONUS = 12.0;
+    private static final double TERRITORY_DELTA_WEIGHT = 20.0;
+    private static final double ARMY_SHARE_DELTA_WEIGHT = 35.0;
+
+    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 20.0;
     private static final double FAILED_COSTLY_ATTACK_WEIGHT = 40.0;
+    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 25.0;
+
+    private static final double SUCCESSFUL_ATTACK_BONUS = 12.0;
     private static final double BREAK_OPPONENT_CONTINENT_WEIGHT = 25.0;
     private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 15.0;
     private static final double TURN_TAX_PER_TURN = 30.0;
