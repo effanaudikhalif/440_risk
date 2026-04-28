@@ -29,19 +29,19 @@ import edu.bu.pas.risk.territory.Territory;
 public class MyActionRewardFunction
     extends RewardFunction<Action>
 {
-    private static final double CONTINENT_DELTA_WEIGHT = 60.0;
-    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 45.0;
-    private static final double TERRITORY_DELTA_WEIGHT = 20.0;
-    private static final double ARMY_SHARE_DELTA_WEIGHT = 35.0;
+    private static final double CONTINENT_DELTA_WEIGHT = 0.6;
+    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 0.18;
+    private static final double TERRITORY_DELTA_WEIGHT = 0.09;
+    private static final double ARMY_SHARE_DELTA_WEIGHT = 0.05;
 
-    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 20.0;
-    private static final double FAILED_COSTLY_ATTACK_WEIGHT = 40.0;
-    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 25.0;
+    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 0.05;
+    private static final double FAILED_COSTLY_ATTACK_WEIGHT = 0.075;
+    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 0.18;
 
-    private static final double SUCCESSFUL_ATTACK_BONUS = 12.0;
-    private static final double BREAK_OPPONENT_CONTINENT_WEIGHT = 25.0;
-    private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 15.0;
-    private static final double TURN_TAX_PER_TURN = 30.0;
+    private static final double SUCCESSFUL_ATTACK_BONUS = 0.075;
+    private static final double BREAK_OPPONENT_CONTINENT_WEIGHT = 0.3;
+    private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 0.23;
+    private static final double TURN_TAX_PER_TURN = 0.02;
 
 
     // continet
@@ -249,8 +249,8 @@ public class MyActionRewardFunction
                           this.countTerritories(state, this.getAgentId()));
     }
 
-    public double getLowerBound() { return -100.0; }
-    public double getUpperBound() { return 100.0; }
+    public double getLowerBound() { return -1; }
+    public double getUpperBound() { return 1; }
 
     /** {@inheritDoc} */
     public double getStateReward(final GameView state) { return Double.NEGATIVE_INFINITY; }
@@ -291,6 +291,7 @@ public class MyActionRewardFunction
         final double territoryDelta = (double)( myTerritoriesAfter - myTerritoriesBefore) / 42.0;
         final double continentDelta = (double) (myContinentsAfter - myContinentsBefore) / 6.0;
         final double armyLoss = (float) Math.max(0, myArmiesBefore - myArmiesAfter) / (double) totalArmiesAfter ;
+        final double armyLossShare = safeDivide(armyLoss, totalArmiesBefore);
 
 
         // ! COMPONENTS
@@ -309,10 +310,10 @@ public class MyActionRewardFunction
             (action instanceof AttackAction && territoryDelta > 0) ? SUCCESSFUL_ATTACK_BONUS : 0.0;
         final double failedCostlyAttackPenalty =
             (action instanceof AttackAction && territoryDelta <= 0 && armyLoss > 0)
-                ? FAILED_COSTLY_ATTACK_WEIGHT * safeDivide(armyLoss, totalArmiesBefore)
+                ? FAILED_COSTLY_ATTACK_WEIGHT * armyLossShare
                 : 0.0;
         final double breakOpponentContinentComponent =
-            BREAK_OPPONENT_CONTINENT_WEIGHT * positivePart(enemyContinentsBefore - enemyContinentsAfter);
+            BREAK_OPPONENT_CONTINENT_WEIGHT;
         final double noActionPenalty =
             (action instanceof NoAction && this.countFavorableAttacks(state) > 0)
                 ? NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY
@@ -326,7 +327,7 @@ public class MyActionRewardFunction
         reward += territoryComponent;
         reward += continentComponent;
         reward += armyShareComponent;
-        reward += strongestOpponentComponent;
+        reward -= strongestOpponentComponent;
         reward += continentCompletionComponent;
         reward += borderVulnerabilityComponent;
         reward += successfulAttackComponent;
