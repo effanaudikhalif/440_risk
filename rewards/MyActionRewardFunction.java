@@ -31,19 +31,19 @@ public class MyActionRewardFunction
 {
 
     // new ethan branch test
-    private static final double CONTINENT_DELTA_WEIGHT = 60.0;
-    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 45.0;
-    private static final double TERRITORY_DELTA_WEIGHT = 20.0;
-    private static final double ARMY_SHARE_DELTA_WEIGHT = 35.0;
+    private static final double CONTINENT_DELTA_WEIGHT = 0.4;
+    private static final double CONTINENT_COMPLETION_DELTA_WEIGHT = 0.12;
+    private static final double TERRITORY_DELTA_WEIGHT = 0.06;
+    private static final double ARMY_SHARE_DELTA_WEIGHT = 0.03;
 
-    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 20.0;
-    private static final double FAILED_COSTLY_ATTACK_WEIGHT = 40.0;
-    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 25.0;
+    private static final double STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT = 0.03;
+    private static final double FAILED_COSTLY_ATTACK_WEIGHT = 0.045;
+    private static final double BORDER_VULNERABILITY_DELTA_WEIGHT = 0.12;
 
-    private static final double SUCCESSFUL_ATTACK_BONUS = 12.0;
-    private static final double BREAK_OPPONENT_CONTINENT_WEIGHT = 25.0;
-    private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 15.0;
-    private static final double TURN_TAX_PER_TURN = 30.0;
+    private static final double SUCCESSFUL_ATTACK_BONUS = 0.045;
+    private static final double BREAK_OPPONENT_CONTINENT_BONUS = 0.2;
+    private static final double NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY = 0.15;
+    private static final double TURN_TAX_PER_TURN = 0.01;
 
 
     // continet
@@ -301,26 +301,27 @@ public class MyActionRewardFunction
         final double territoryComponent = TERRITORY_DELTA_WEIGHT * territoryDelta;
         final double continentComponent = CONTINENT_DELTA_WEIGHT * continentDelta;
         final double armyShareComponent = ARMY_SHARE_DELTA_WEIGHT * (armyShareAfter - armyShareBefore);
-        final double strongestOpponentComponent = STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT
-            * (strongestOpponentArmyShareBefore - strongestOpponentArmyShareAfter);
         final double continentCompletionComponent =
             CONTINENT_COMPLETION_DELTA_WEIGHT * (continentCompletionAfter - continentCompletionBefore);
+        
+        final double strongestOpponentComponent = STRONGEST_OPPONENT_ARMY_SHARE_DELTA_WEIGHT
+            * (strongestOpponentArmyShareBefore - strongestOpponentArmyShareAfter);
         final double borderVulnerabilityComponent =
             BORDER_VULNERABILITY_DELTA_WEIGHT * (borderVulnerabilityBefore - borderVulnerabilityAfter);
-        final double successfulAttackComponent =
-            (action instanceof AttackAction && territoryDelta > 0) ? SUCCESSFUL_ATTACK_BONUS : 0.0;
         final double failedCostlyAttackPenalty =
             (action instanceof AttackAction && territoryDelta <= 0 && armyLoss > 0)
                 ? FAILED_COSTLY_ATTACK_WEIGHT * safeDivide(armyLoss, totalArmiesBefore)
                 : 0.0;
+
+        final double successfulAttackComponent =
+            (action instanceof AttackAction && territoryDelta > 0) ? SUCCESSFUL_ATTACK_BONUS : 0.0;
         final double breakOpponentContinentComponent =
             BREAK_OPPONENT_CONTINENT_WEIGHT * positivePart(enemyContinentsBefore - enemyContinentsAfter);
         final double noActionPenalty =
             (action instanceof NoAction && this.countFavorableAttacks(state) > 0)
                 ? NO_ACTION_WHEN_ATTACK_AVAILABLE_PENALTY
                 : 0.0;
-        final double turnTaxPenalty =
-            TURN_TAX_PER_TURN;
+        final double turnTaxPenalty =  TURN_TAX_PER_TURN * state.numTurns();
 
 
         // ! Adding to reward
@@ -328,16 +329,18 @@ public class MyActionRewardFunction
         reward += territoryComponent;
         reward += continentComponent;
         reward += armyShareComponent;
-        reward += strongestOpponentComponent;
         reward += continentCompletionComponent;
-        reward += borderVulnerabilityComponent;
-        reward += successfulAttackComponent;
+
+        reward -= strongestOpponentComponent;
+        reward -= borderVulnerabilityComponent;
         reward -= failedCostlyAttackPenalty;
+        
+        reward += successfulAttackComponent;
         reward += breakOpponentContinentComponent;
         reward -= noActionPenalty;
         reward -= turnTaxPenalty;
 
-        final double finalReward = this.clamp(reward);
+        // final double finalReward = this.clamp(reward);
         return finalReward;
     }
 
