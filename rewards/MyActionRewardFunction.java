@@ -251,8 +251,8 @@ public class MyActionRewardFunction
                           this.countTerritories(state, this.getAgentId()));
     }
 
-    public double getLowerBound() { return -100.0; }
-    public double getUpperBound() { return 100.0; }
+    public double getLowerBound() { return -1.0; }
+    public double getUpperBound() { return 1.0; }
 
     /** {@inheritDoc} */
     public double getStateReward(final GameView state) { return Double.NEGATIVE_INFINITY; }
@@ -332,15 +332,15 @@ public class MyActionRewardFunction
         reward += continentCompletionComponent;
 
         reward -= strongestOpponentComponent;
-        reward -= borderVulnerabilityComponent;
+        reward += borderVulnerabilityComponent;
         reward -= failedCostlyAttackPenalty;
-        
+
         reward += successfulAttackComponent;
         reward += breakOpponentContinentComponent;
         reward -= noActionPenalty;
         reward -= turnTaxPenalty;
 
-        // final double finalReward = this.clamp(reward);
+        final double finalReward = this.clamp(reward);
         return finalReward;
     }
 
